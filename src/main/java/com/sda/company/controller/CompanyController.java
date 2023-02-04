@@ -7,22 +7,21 @@ import com.sda.company.dto.CompanyShortInfoDto;
 import com.sda.company.service.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/company")
+@ControllerAdvice
 public class CompanyController {
-
     private final CompanyService companyService;
-
     private final CustomFakerCompany customFakerCompany;
 
     @Autowired
-    public CompanyController(CompanyService companyService, CustomFakerCompany customFakerCompany) {
+    public CompanyController(@Qualifier("companyServiceImpl2") CompanyService companyService, CustomFakerCompany customFakerCompany) {
         this.companyService = companyService;
         this.customFakerCompany = customFakerCompany;
     }
@@ -30,24 +29,31 @@ public class CompanyController {
     @PostMapping("/create")
     public ResponseEntity<CompanyInfoDto> createCompany(@RequestBody @Valid CompanyCreateDto companyCreateDto) {
         CompanyInfoDto companyInfoDto = companyService.createCompany(companyCreateDto);
+
         return ResponseEntity.ok(companyInfoDto);
+//        return ResponseEntity.ok(companyService.createCompany(companyCreateDto)) -> alternative
     }
 
     @GetMapping("/getAllCompanies")
     public ResponseEntity<List<CompanyShortInfoDto>> getAllCompanies() {
         List<CompanyShortInfoDto> allCompanies = companyService.getAllCompanies();
+
         return ResponseEntity.ok(allCompanies);
+        //return ResponseEntity.ok(companyService.getAllCompanies());   -> alternative
     }
 
     @GetMapping("/findCompanyByName")
     public ResponseEntity<CompanyInfoDto> getCompanyByName(@RequestParam String name) {
-        Optional<CompanyInfoDto> companyInfoDto = companyService.findCompanyByName(name);
-        return ResponseEntity.of(companyInfoDto);
+        CompanyInfoDto companyInfoDto = companyService.findCompanyByName(name);
+
+        return ResponseEntity.ok(companyInfoDto);
     }
 
     @GetMapping("/generateCompanies")
     public ResponseEntity<String> generateCompanies() {
         companyService.generateCompanies(customFakerCompany.generateDummyCompanies());
-        return ResponseEntity.ok("The dummy companies were generated!");
+
+        return ResponseEntity.ok("Companies were generated");
     }
+
 }
